@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Giám Sát Năng Lượng Mặt Trời - T-Digital GenZ</title>
+    <title>Hệ Thống Giám Sát Năng Lượng Mặt Trời (N2-3)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -186,12 +186,12 @@
         <input type="password" id="txt-password" placeholder="Nhập mật khẩu...">
     </div>
     <button id="btn-login" onclick="handleLogin()">VÀO HỆ THỐNG</button>
-    <p id="login-error">Thông tin đăng nhập chưa đúng rồi bạn ơi!</p>
+    <p id="login-error">Thông tin đăng nhập chưa đúng,vui lòng nhập lại!</p>
 </div>
 
 <div class="container" id="main-dashboard">
     <header>
-        <h1><i class="fa-solid fa-bolt-lightning"></i> T - DIGITAL GENZ SOLAR SYSTEMS</h1>
+        <h1><i class="fa-solid fa-bolt-lightning"></i> HỆ THỐNG GIÁM SÁT VÀ BÁO LỖI HỆ THỐNG MẶT TRỜI</h1>
         <div class="header-buttons">
             <button id="btn-excel" class="btn-action" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> Xuất file Excel</button>
             <button id="btn-logout" class="btn-action" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</button>
@@ -203,7 +203,7 @@
             <div class="grid-cards">
                 <div class="card" id="card-voltage">
                     <div class="card-info">
-                        <h3>Điện Áp Solar</h3>
+                        <h3>Điện Áp</h3>
                         <p id="lbl-voltage">0.0 V</p>
                     </div>
                     <div class="card-icon"><i class="fa-solid fa-bolt"></i></div>
@@ -217,7 +217,7 @@
                 </div>
                 <div class="card" id="card-power">
                     <div class="card-info">
-                        <h3>Hiệu Suất Thực (W)</h3>
+                        <h3>Hiệu Suất Thực</h3>
                         <p id="lbl-power">0.0 W</p>
                     </div>
                     <div class="card-icon"><i class="fa-solid fa-plug"></i></div>
