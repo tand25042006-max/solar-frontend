@@ -462,6 +462,86 @@
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Solar_Efficiency_Logs");
         XLSX.writeFile(workbook, "BaoCao_HieuSuat_Solar_T_Digital.xlsx");
-    }<script src="nhandulieu.js"></script>
+        <script>
+// ==========================================
+// 1. CẤU HÌNH ĐƯỜNG DẪN API RENDER
+// ==========================================
+const API_URL = "https://esp32-backend-vqfp.onrender.com/api/data";
+
+// ==========================================
+// 2. HÀM XỬ LÝ ĐĂNG NHẬP
+// ==========================================
+function handleLogin() {
+    const userField = document.getElementById("txt-username");
+    const passField = document.getElementById("txt-password");
+    const loginError = document.getElementById("login-error");
+
+    const taiKhoan = userField ? userField.value.trim() : "";
+    const matKhau = passField ? passField.value.trim() : "";
+
+    // Tài khoản: tanvippro / Mật khẩu: 123456
+    if (taiKhoan === "tanvippro" && matKhau === "123456") {
+        alert("Đăng nhập thành công!");
+        const khungLogin = document.getElementById("login-screen");
+        const khungSolar = document.getElementById("main-dashboard");
+
+        if (khungLogin && khungSolar) {
+            khungLogin.style.display = "none";     // Ẩn màn hình đăng nhập
+            khungSolar.style.display = "block";    // Hiện màn hình Solar
+            loadSolarData();                       // Gọi lấy dữ liệu ngay
+        }
+    } else {
+        if (loginError) {
+            loginError.style.display = "block";
+            loginError.innerText = "Thông tin đăng nhập chưa đúng, vui lòng nhập lại!";
+        } else {
+            alert("Sai tài khoản hoặc mật khẩu!");
+        }
+    }
+}
+
+// ==========================================
+// 3. HÀM FETCH LẤY DỮ LIỆU TỪ RENDER & SUPABASE
+// ==========================================
+function loadSolarData() {
+    fetch(API_URL)
+        .then(response => {
+            if (!response.ok) throw new Error("Lỗi kết nối tới Render!");
+            return response.json();
+        })
+        .then(data => {
+            console.log("Dữ liệu Solar nhận về:", data);
+            if (data && data.length > 0) {
+                // Lấy bản ghi mới nhất ở cuối mảng dữ liệu
+                const latest = data[data.length - 1]; 
+                
+                // Đổ số liệu vào các thẻ hiển thị trên giao diện của bạn
+                if(document.getElementById("dien-ap")) {
+                    document.getElementById("dien-ap").innerText = latest.dien_ap ? latest.dien_ap.toFixed(1) + " V" : "0.0 V";
+                }
+                if(document.getElementById("dong-dien")) {
+                    document.getElementById("dong-dien").innerText = latest.dong_dien ? latest.dong_dien.toFixed(2) + " A" : "0.00 A";
+                }
+                if(document.getElementById("cong-suat")) {
+                    document.getElementById("cong-suat").innerText = latest.cong_suat ? latest.cong_suat.toFixed(1) + " W" : "0.0 W";
+                }
+                if(document.getElementById("nhiet-do")) {
+                    document.getElementById("nhiet-do").innerText = latest.nhiet_do ? latest.nhiet_do + " °C" : "-- °C";
+                }
+            }
+        })
+        .catch(error => console.error("Lỗi cập nhật dữ liệu từ Render:", error));
+}
+
+// Cứ 3 giây tự động cập nhật số liệu một lần
+setInterval(loadSolarData, 3000);
+
+// Ẩn dòng chữ báo lỗi đỏ khi vừa mở trang
+document.addEventListener("DOMContentLoaded", () => {
+    const loginError = document.getElementById("login-error");
+    if (loginError) loginError.style.display = "none";
+});
+</script>
+                    
 </body>
 </html>
