@@ -1,40 +1,41 @@
-// Đường link Render thực tế của bạn để lấy dữ liệu
-const BACKEND_URL = "https://esp32-backend-vqfp.onrender.com/api/data";
+// Link API lấy dữ liệu từ Backend Render của bạn
+const API_URL = "https://esp32-backend-vqfp.onrender.com/api/data";
 
-function fetchSolarData() {
-    fetch(BACKEND_URL)
+function loadSolarData() {
+    fetch(API_URL)
         .then(response => {
             if (!response.ok) {
-                throw new Error("Không thể kết nối tới Server Render");
+                throw new Error("Lỗi mạng khi kết nối tới Render!");
             }
             return response.json();
         })
         .then(data => {
-            console.log("Dữ liệu nhận về từ Render:", data);
+            console.log("Dữ liệu nhận từ Render:", data);
             
-            // CẬP NHẬT LÊN GIAO DIỆN WEB
-            // Lưu ý: Bạn hãy kiểm tra lại file HTML của bạn xem các ID có tên là gì 
-            // rồi thay thế "id-dien-ap", "id-dong-dien"... cho đúng nhé!
-            if(document.getElementById("id-dien-ap")) {
-                document.getElementById("id-dien-ap").innerText = data.voltage + " V";
-            }
-            if(document.getElementById("id-dong-dien")) {
-                document.getElementById("id-dong-dien").innerText = data.current + " A";
-            }
-            if(document.getElementById("id-cong-suat")) {
-                document.getElementById("id-cong-suat").innerText = data.power + " W";
-            }
-            if(document.getElementById("id-thoi-gian")) {
-                document.getElementById("id-thoi-gian").innerText = "Cập nhật lúc: " + data.updatedAt;
+            if (data && data.length > 0) {
+                // Supabase trả về một mảng, ta lấy phần tử mới nhất ở cuối mảng
+                const latest = data[data.length - 1]; 
+                
+                // Đồng bộ chính xác tên các cột tiếng Việt từ Database lên giao diện web
+                if(document.getElementById("dien-ap")) {
+                    document.getElementById("dien-ap").innerText = latest.dien_ap ? latest.dien_ap.toFixed(1) + " V" : "0.0 V";
+                }
+                if(document.getElementById("dong-dien")) {
+                    document.getElementById("dong-dien").innerText = latest.dong_dien ? latest.dong_dien.toFixed(2) + " A" : "0.00 A";
+                }
+                if(document.getElementById("cong-suat")) {
+                    document.getElementById("cong-suat").innerText = latest.cong_suat ? latest.cong_suat.toFixed(1) + " W" : "0.0 W";
+                }
+                if(document.getElementById("nhiet-do")) {
+                    document.getElementById("nhiet-do").innerText = latest.nhiet_do ? latest.nhiet_do + " °C" : "-- °C";
+                }
             }
         })
         .catch(error => {
-            console.error("Lỗi Fetch dữ liệu:", error);
+            console.error("Lỗi Fetch Frontend:", error);
         });
 }
 
-// Thiết lập tự động lấy dữ liệu mới sau mỗi 3 giây (3000ms)
-setInterval(fetchSolarData, 3000);
-
-// Tự động chạy ngay 1 lần khi vừa tải xong trang web
-window.onload = fetchSolarData;
+// Cứ 3 giây tự động tải lại dữ liệu mới từ Render một lần
+setInterval(loadSolarData, 3000);
+loadSolarData(); // Chạy ngay lập tức khi mở trang web
