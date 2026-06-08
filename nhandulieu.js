@@ -4,45 +4,44 @@
 const API_URL = "https://esp32-backend-vqfp.onrender.com/api/data";
 
 // ==========================================
-// 2. XOÁ BỎ RÀO CẢN ĐĂNG NHẬP (NẾU CÓ) HOẶC XỬ LÝ CHUYỂN TAB
+// 2. HÀM XỬ LÝ ĐĂNG NHẬP KHỚP 100% VỚI INDEX.HTML CỦA BẠN
 // ==========================================
-// Thêm đoạn này để đảm bảo nếu trang web có form đăng nhập, nó sẽ chạy mượt mà
-document.addEventListener("DOMContentLoaded", () => {
-    // Tìm form đăng nhập của bạn (thường có id là login-form hoặc loginForm)
-    const loginForm = document.querySelector("form") || document.getElementById("loginForm");
-    
-    if (loginForm) {
-        loginForm.addEventListener("submit", (e) => {
-            e.preventDefault(); // Chặn hành vi load lại trang của form
+function handleLogin() {
+    // Lấy chính xác dữ liệu từ ID ô nhập trên giao diện của bạn
+    const userField = document.getElementById("txt-username");
+    const passField = document.getElementById("txt-password");
+    const loginError = document.getElementById("login-error");
+
+    const taiKhoan = userField ? userField.value.trim() : "";
+    const matKhau = passField ? passField.value.trim() : "";
+
+    // Cấu hình Tài khoản & Mật khẩu theo ý bạn (Ví dụ dưới đây là: tanvippro / 123456)
+    if (taiKhoan === "tanvippro" && matKhau === "123456") {
+        alert("Đăng nhập thành công!");
+
+        const khungLogin = document.getElementById("login-screen");
+        const khungSolar = document.getElementById("main-dashboard");
+
+        if (khungLogin && khungSolar) {
+            khungLogin.style.display = "none";     // Ẩn màn hình đăng nhập
+            khungSolar.style.display = "block";    // Mở toang giao diện Solar chính
             
-            // Lấy tài khoản mật khẩu bạn nhập (sửa id cho đúng với file html của bạn nếu có)
-            const taiKhoan = document.querySelector('input[type="text"]')?.value || "";
-            const matKhau = document.querySelector('input[type="password"]')?.value || "";
-            
-            // Đoạn này bạn có thể sửa lại tài khoản/mật khẩu theo ý bạn
-            if (taiKhoan === "tanvippro" || taiKhoan === "123456") { 
-                alert("Đăng nhập thành công!");
-                
-                // Nếu giao diện của bạn dùng cơ chế Ẩn/Hiện bằng CSS (ví dụ ẩn form hiện bảng điều khiển)
-                const loginBox = document.getElementById("login-container") || document.querySelector(".login-box");
-                const mainDash = document.getElementById("main-dashboard") || document.querySelector(".container");
-                
-                if (loginBox && mainDash) {
-                    loginBox.style.display = "none";   // Ẩn khung đăng nhập
-                    mainDash.style.display = "block"; // Hiện màn hình Solar
-                } else {
-                    // Nếu giao diện của bạn chuyển hẳn sang trang khác thì dùng lệnh dưới:
-                    // window.location.href = "dashboard.html"; 
-                }
-            } else {
-                alert("Sai tài khoản hoặc mật khẩu!");
-            }
-        });
+            // Chạy lấy dữ liệu từ Render/Supabase đổ lên các ô số ngay lập tức
+            loadSolarData();
+        }
+    } else {
+        // Nếu sai, hiển thị dòng chữ báo lỗi màu đỏ có sẵn trên giao diện của bạn
+        if (loginError) {
+            loginError.style.display = "block";
+            loginError.innerText = "Thông tin đăng nhập chưa đúng, vui lòng nhập lại!";
+        } else {
+            alert("Sai tài khoản hoặc mật khẩu!");
+        }
     }
-});
+}
 
 // ==========================================
-// 3. HÀM FETCH LẤY DỮ LIỆU SOLAR TỪ RENDER
+// 3. HÀM FETCH LẤY DỮ LIỆU SOLAR TỪ RENDER & SUPABASE
 // ==========================================
 function loadSolarData() {
     fetch(API_URL)
@@ -51,12 +50,12 @@ function loadSolarData() {
             return response.json();
         })
         .then(data => {
-            console.log("Dữ liệu Solar:", data);
+            console.log("Dữ liệu Solar nhận về:", data);
             if (data && data.length > 0) {
-                // Lấy bản ghi mới nhất ở cuối mảng dữ liệu do Supabase trả về
-            const latest = data[data.length - 1]; 
+                // Supabase trả về mảng, lấy bản ghi mới nhất nằm ở cuối mảng
+                const latest = data[data.length - 1]; 
                 
-                // Đổ dữ liệu vào các thẻ HTML tương ứng trên giao diện của bạn
+                // Đổ số liệu vào các thẻ ID hiển thị tương ứng trên màn hình của bạn
                 if(document.getElementById("dien-ap")) {
                     document.getElementById("dien-ap").innerText = latest.dien_ap ? latest.dien_ap.toFixed(1) + " V" : "0.0 V";
                 }
@@ -71,9 +70,14 @@ function loadSolarData() {
                 }
             }
         })
-        .catch(error => console.error("Lỗi cập nhật dữ liệu:", error));
+        .catch(error => console.error("Lỗi cập nhật dữ liệu từ Render:", error));
 }
 
-// Chạy cập nhật dữ liệu liên tục sau mỗi 3 giây
+// Cứ 3 giây hệ thống tự động tải lại dữ liệu từ ESP32 một lần để cập nhật số mới
 setInterval(loadSolarData, 3000);
-loadSolarData(); // Chạy lần đầu ngay khi mở trang
+
+// Đảm bảo ẩn dòng thông báo lỗi đăng nhập đỏ khi vừa load trang
+document.addEventListener("DOMContentLoaded", () => {
+    const loginError = document.getElementById("login-error");
+    if (loginError) loginError.style.display = "none";
+});
